@@ -26,6 +26,7 @@ var processArrary = [
 var runQueue = [];
 var readyQueue = [];
 var ioQueue = [];
+var complete = [];
 
 // Start at time 0
 var currentTime = 0;
@@ -82,21 +83,33 @@ while (runQueue.length > 0 || readyQueue.length > 0 || ioQueue.length > 0) {
 
 	// See if a process is currently running
 	if (runQueue.length > 0) {
+
 		// If its burst time has run out move it out
 		if (runQueue[0].times[0] == 0) {
+
+			// Get the next time in the list
 			runQueue[0].times.shift()
+
+			// If there is another time then this is an
+			//	io time so move it to the io queue
+			//	or else there are no more times so
+			//	it is done - move it to complete
 			if (runQueue[0].times.length != 0) {
-				ioQueue.push(runQueue.shift())
+				addToIOQueue(runQueue.shift())
+			} else {
+				addToCompleteQueue(runQueue.shift())
 			}
+
 			// Set the new running process by moving the top
 			//	of the ready queue to the run queue
 			if (readyQueue.length != 0) {
 				runQueue.push(readyQueue.shift())
-				displayStep()
 			}
+			displayStep()
 		}
 	} else {
 		// There was no running process
+
 		// Set the new running process by moving the top
 		//	of the ready queue to the run queue
 		if (readyQueue.length != 0) {
@@ -117,11 +130,37 @@ function addToReadyQueue(p) {
 	readyQueue.push(p)
 }
 
+// Add a process to the io queue and order by name
+function addToIOQueue(p) {
+	for (let i = 0; i < ioQueue.length; i++) {
+		if (p.name < ioQueue[i].name) {
+			ioQueue.splice(i, 0, p)
+			return
+		}
+	}
+	ioQueue.push(p)
+}
+
+// Add a process to the complete queue and order by name
+function addToCompleteQueue(p) {
+	for (let i = 0; i < complete.length; i++) {
+		if (p.name < complete[i].name) {
+			complete.splice(i, 0, p)
+			return
+		}
+	}
+	complete.push(p)
+}
+
 // Display output for this step
 function displayStep() {
 	console.log("Current Time: " + currentTime)
 	console.log("")
-	console.log("Now running:  " + runQueue[0].name)
+	if (runQueue.length != 0) {
+		console.log("Now running:  " + runQueue[0].name)
+	} else {
+		console.log("Now running:  [idle]")
+	}
 	console.log("..................................................")
 	console.log("")
 	console.log("Ready Queue:  Process    Burst")
@@ -141,6 +180,14 @@ function displayStep() {
 		ioQueue.forEach(p => {
 			console.log("              " + p.name + "         " + p.times[0])
 		})
+	}
+	if (complete.length != 0) {
+		console.log("..................................................")
+		console.log("")
+		var str = complete.map(p => {
+			return p.name
+		})
+		console.log("Completed:    " + str.join(",  "))
 	}
 	console.log("")
 	console.log("::::::::::::::::::::::::::::::::::::::::::::::::::")
