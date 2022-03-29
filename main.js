@@ -11,15 +11,15 @@ var p9 = [ 13, 37, 8, 41, 7, 27, 12, 29, 5, 27, 6, 18, 3, 33, 4, 62, 6 ];
 
 // Create process objects
 var processArrary = [
-	{ name: "P1", times: p1, rt: 0, wt: 0, tt: 0 },
-	{ name: "P2", times: p2, rt: 0, wt: 0, tt: 0 },
-	{ name: "P3", times: p3, rt: 0, wt: 0, tt: 0 },
-	{ name: "P4", times: p4, rt: 0, wt: 0, tt: 0 },
-	{ name: "P5", times: p5, rt: 0, wt: 0, tt: 0 },
-	{ name: "P6", times: p6, rt: 0, wt: 0, tt: 0 },
-	{ name: "P7", times: p7, rt: 0, wt: 0, tt: 0 },
-	{ name: "P8", times: p8, rt: 0, wt: 0, tt: 0 },
-	{ name: "P9", times: p9, rt: 0, wt: 0, tt: 0 },
+	{ name: "P1", times: p1, rt: 0, rspt: -1, wt: 0, tt: 0 },
+	{ name: "P2", times: p2, rt: 0, rspt: -1, wt: 0, tt: 0 },
+	{ name: "P3", times: p3, rt: 0, rspt: -1, wt: 0, tt: 0 },
+	{ name: "P4", times: p4, rt: 0, rspt: -1, wt: 0, tt: 0 },
+	{ name: "P5", times: p5, rt: 0, rspt: -1, wt: 0, tt: 0 },
+	{ name: "P6", times: p6, rt: 0, rspt: -1, wt: 0, tt: 0 },
+	{ name: "P7", times: p7, rt: 0, rspt: -1, wt: 0, tt: 0 },
+	{ name: "P8", times: p8, rt: 0, rspt: -1, wt: 0, tt: 0 },
+	{ name: "P9", times: p9, rt: 0, rspt: -1, wt: 0, tt: 0 },
 ];
 
 // Create queues
@@ -39,6 +39,10 @@ processArrary.forEach(p => {
 // Move the top of the ready queue to the run queue
 runQueue.push(readyQueue.shift())
 
+// Set the response time of the first item in the
+// run queue to be 0
+runQueue[0].rspt = 0
+
 // Display
 console.log("")
 displayStep()
@@ -54,6 +58,13 @@ while (runQueue.length > 0 || readyQueue.length > 0 || ioQueue.length > 0) {
 		p.tt++
 		p.rt++
 		p.times[0]--
+
+		// If the response time is -1 it means this is
+		//	the first time this process was in the run
+		//	queue so set its response time
+		if (p.rspt == -1) {
+			p.rspt = currentTime
+		}
 	})
 
 	// Handle ready queue times
@@ -118,6 +129,60 @@ while (runQueue.length > 0 || readyQueue.length > 0 || ioQueue.length > 0) {
 		}
 	}
 }
+
+// Calculate stats
+var totalRunTime = processArrary.reduce((prev, curr) => {
+	return prev + curr.rt;
+}, 0);
+var totalResponseTime = processArrary.reduce((prev, curr) => {
+	return prev + curr.rspt;
+}, 0);
+var totalWaitTime = processArrary.reduce((prev, curr) => {
+	return prev + curr.wt;
+}, 0);
+var totalTurnaroundTime = processArrary.reduce((prev, curr) => {
+	return prev + curr.tt;
+}, 0);
+var utilization = (totalRunTime / currentTime) * 100;
+var avgWait = totalWaitTime / 9;
+var avgTurnaround = totalTurnaroundTime / 9;
+var avgResponse = totalResponseTime / 9;
+
+// Print out results
+console.log("Finished")
+console.log("")
+console.log("Total Time:         " + currentTime)
+console.log("CPU Utilization:    " + utilization.toFixed(4) + "%")
+
+// Show waiting times
+console.log("")
+console.log("Waiting Times       " + processArrary.reduce((prev, curr) => {
+	return prev + curr.name.padEnd(5);
+}, ""))
+console.log("                    " + processArrary.reduce((prev, curr) => {
+	return prev + curr.wt.toString().padEnd(5);
+}, ""))
+console.log("Average Wait:       " + avgWait.toFixed(2))
+
+// Show turnaround times
+console.log("")
+console.log("Turnaround Times    " + processArrary.reduce((prev, curr) => {
+	return prev + curr.name.padEnd(5);
+}, ""))
+console.log("                    " + processArrary.reduce((prev, curr) => {
+	return prev + curr.tt.toString().padEnd(5);
+}, ""))
+console.log("Average Turnaround: " + avgTurnaround.toFixed(2))
+
+// Show response times
+console.log("")
+console.log("Response Times      " + processArrary.reduce((prev, curr) => {
+	return prev + curr.name.padEnd(5);
+}, ""))
+console.log("                    " + processArrary.reduce((prev, curr) => {
+	return prev + curr.rspt.toString().padEnd(5);
+}, ""))
+console.log("Average Response:   " + avgResponse.toFixed(2))
 
 // Add a process to the ready queue and order by time remaining
 function addToReadyQueue(p) {
