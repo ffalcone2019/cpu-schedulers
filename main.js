@@ -1,3 +1,14 @@
+// COP4610 Operating Systems
+// Assignment 2
+//
+// Fallon Falcone, Solomon Markowitz
+// 3/29/2022
+//
+// This program simulates the SJF algorithm using the inputs given.
+// It shows each context switch and what processes are in the run, ready,
+// and IO queues.  It calculates the final times and averages, and displays
+// them when the simulation is complete.
+
 // Input times for the 9 processes
 var p1 = [ 7, 22, 6, 19, 12, 44, 8, 21, 10, 37, 5, 24, 6, 44, 7, 43, 8 ];
 var p2 = [ 14, 48, 15, 44, 17, 42, 22, 37, 19, 76, 14, 41, 16, 31, 17, 43, 18 ];
